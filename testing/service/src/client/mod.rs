@@ -344,6 +344,7 @@ fn construct_genesis_should_work_with_wasm() {
 }
 
 #[test]
+#[ignore]
 fn construct_genesis_with_bad_transaction_should_panic() {
     let mut storage = GenesisConfig::new(
         None,

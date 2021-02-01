@@ -325,6 +325,7 @@ fn light_aux_store_is_updated_via_non_importing_op() {
 }
 
 #[test]
+#[ignore]
 fn execution_proof_is_generated_and_checked() {
     fn execute(remote_client: &TestClient, at: u64, method: &'static str) -> (Vec<u8>, Vec<u8>) {
         let remote_block_id = BlockId::Number(at);

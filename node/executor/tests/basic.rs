@@ -134,14 +134,14 @@ fn blocks() -> ((Vec<u8>, Hash), (Vec<u8>, Hash)) {
                 signed: Some((bob(), signed_extra(0, 0))),
                 function: Call::Balances(pallet_balances::Call::transfer(
                     alice().into(),
-                    5 * DOLLARS,
+                    69 * DOLLARS,
                 )),
             },
             CheckedExtrinsic {
                 signed: Some((alice(), signed_extra(1, 0))),
                 function: Call::Balances(pallet_balances::Call::transfer(
                     bob().into(),
-                    15 * DOLLARS,
+                    69 * DOLLARS,
                 )),
             },
         ],
@@ -411,7 +411,6 @@ fn full_native_block_import_works() {
         ];
         assert_eq!(System::events(), events);
     });
-    //println!("{} {} {}",Balances::total_balance(&alice()), alice_last_known_balance, fees);
 
     fees = t.execute_with(|| transfer_fee(&xt()));
 
@@ -425,19 +424,12 @@ fn full_native_block_import_works() {
     .0
     .unwrap();
 
-    println!(
-        "{:?} {:?} {:?}",
-        Balances::total_balance(&alice()),
-        alice_last_known_balance,
-        fees
-    );
-
     t.execute_with(|| {
         assert_eq!(
             Balances::total_balance(&alice()),
-            alice_last_known_balance - 10 * DOLLARS - fees,
+            alice_last_known_balance - fees,
         );
-        assert_eq!(Balances::total_balance(&bob()), 179 * DOLLARS - fees,);
+        assert_eq!(Balances::total_balance(&bob()), 169 * DOLLARS - fees,);
         let events = vec![
             EventRecord {
                 phase: Phase::ApplyExtrinsic(0),
@@ -455,7 +447,7 @@ fn full_native_block_import_works() {
                 event: Event::pallet_balances(pallet_balances::RawEvent::Transfer(
                     bob(),
                     alice(),
-                    5 * DOLLARS,
+                    69 * DOLLARS,
                 )),
                 topics: vec![],
             },
@@ -479,7 +471,7 @@ fn full_native_block_import_works() {
                 event: Event::pallet_balances(pallet_balances::RawEvent::Transfer(
                     alice(),
                     bob(),
-                    15 * DOLLARS,
+                    69 * DOLLARS,
                 )),
                 topics: vec![],
             },
@@ -528,26 +520,24 @@ fn full_wasm_block_import_works() {
         alice_last_known_balance = Balances::total_balance(&alice());
     });
 
-    // executor_call::<NeverNativeValue, fn() -> _>(
-    //     &mut t,
-    //     "Core_execute_block",
-    //     &block2.0,
-    //     false,
-    //     None,
-    // )
-    // .0
-    // .unwrap();
-
     fees = t.execute_with(|| transfer_fee(&xt()));
-    //assert_eq!(alice_last_known_balance, 41984999999684051000);
-    //assert_eq!(fees, 15000000315948530);
+
+    executor_call::<NeverNativeValue, fn() -> _>(
+        &mut t,
+        "Core_execute_block",
+        &block2.0,
+        false,
+        None,
+    )
+    .0
+    .unwrap();
 
     t.execute_with(|| {
         assert_eq!(
             Balances::total_balance(&alice()),
-            alice_last_known_balance - 10 * DOLLARS - fees,
+            alice_last_known_balance - fees,
         );
-        assert_eq!(Balances::total_balance(&bob()), 179 * DOLLARS - fees,);
+        assert_eq!(Balances::total_balance(&bob()), 169 * DOLLARS - fees,);
     });
 }
 

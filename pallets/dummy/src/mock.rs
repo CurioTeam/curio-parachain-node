@@ -129,7 +129,7 @@ pub type Dummy = dummy::Module<Test>;
 const MINT: <Test as pallet_balances::Trait>::Balance = 1_000_000;
 
 // Build test environment by setting the root `key` for the Genesis.
-pub fn new_test_ext(root_key: u64) -> sp_io::TestExternalities {
+pub fn new_test_ext(_root_key: u64) -> sp_io::TestExternalities {
     let mut t = frame_system::GenesisConfig::default()
         .build_storage::<Test>()
         .unwrap();
