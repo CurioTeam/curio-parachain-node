@@ -1,5 +1,4 @@
 name:                              Building and Testing Suite
-
 on:
   pull_request:
   push:
@@ -33,7 +32,7 @@ jobs:
       - name:                      Checkout sources & submodules
         uses:                      actions/checkout@v2
         with:
-          fetch-depth:             1
+          fetch-depth:             2
           submodules:              false
       - name:                      Install nightly
         uses:                      actions-rs/toolchain@v1
@@ -63,7 +62,14 @@ jobs:
 ## Build Stage
       - name:                      Building rust
         uses:                      actions-rs/cargo@master
-        if:                        github.ref == 'refs/heads/master'
+        if:                        github.ref == 'refs/heads/main'
         with:
           command:                 build
           args:                    --all --release --verbose
+## Artifacts prepare          
+      - name:                      Prepare artifacts
+        if:                        github.ref == 'refs/heads/main'
+        uses:                      actions/upload-artifact@master
+        with:
+          name:                    curio
+          path:                    target/release/curio
