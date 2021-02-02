@@ -94,7 +94,7 @@ decl_module! {
                 | minted_amount | -> Result< BalanceOf<T>, DispatchError> {
                     ensure!( *minted_amount>=amount , Error::<T>::TooMuch);
 
-                    *minted_amount =  *minted_amount - amount;
+                    *minted_amount -= amount;
                     let _ = T::Currency::deposit_creating(
                         &account,
                         amount,

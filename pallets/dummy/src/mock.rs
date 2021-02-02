@@ -25,7 +25,6 @@ use frame_support::{
 use frame_system::EnsureRoot;
 use pallet_balances as balances;
 use sp_core::H256;
-use sp_io;
 use sp_runtime::{
     testing::Header,
     traits::{BlakeTwo256, IdentityLookup},
@@ -126,14 +125,12 @@ pub type Dummy = dummy::Module<Test>;
 // pub type DummyCall = dummy::Call<Test>;
 // pub type BalancesCall = balances::Call<Test>;
 
-const MINT: <Test as pallet_balances::Trait>::Balance = 1_000_000;
-
 // Build test environment by setting the root `key` for the Genesis.
 pub fn new_test_ext(_root_key: u64) -> sp_io::TestExternalities {
     let mut t = frame_system::GenesisConfig::default()
         .build_storage::<Test>()
         .unwrap();
-    super::GenesisConfig::<Test> { to_mint: MINT }
+    super::GenesisConfig::<Test> { to_mint: 1_000_000 }
         .assimilate_storage(&mut t)
         .unwrap();
     t.into()
