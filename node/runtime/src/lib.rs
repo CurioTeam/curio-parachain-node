@@ -907,11 +907,15 @@ impl pallet_vesting::Trait for Runtime {
     type WeightInfo = weights::pallet_vesting::WeightInfo;
 }
 
+parameter_types! {
+     pub const BridgeModuleId: ModuleId = ModuleId(*b"br/curio");
+}
 impl pallet_dummy::Trait for Runtime {
     type Event = Event;
     type Currency = Balances;
     type WeightInfo = ();
-    type MintOrigin = EnsureRootOrHalfCouncil;
+    type MintOrigin = EnsureRoot<AccountId>; // EnsureRootOrHalfCouncil;
+    type ModuleId = BridgeModuleId;
 }
 
 construct_runtime!(

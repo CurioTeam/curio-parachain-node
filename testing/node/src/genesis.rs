@@ -126,7 +126,7 @@ pub fn config_endowed(
         }),
         pallet_vesting: Some(Default::default()),
         pallet_dummy: Some(DummyConfig {
-            to_mint: 100 * DOLLARS,
+            balance: 100 * DOLLARS,
         }),
     }
 }

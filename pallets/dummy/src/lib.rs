@@ -18,11 +18,11 @@
 #![cfg_attr(not(feature = "std"), no_std)]
 
 use frame_support::{
-    decl_error, decl_event, decl_module, decl_storage, ensure,
-    traits::{Currency, EnsureOrigin},
+    decl_error, decl_event, decl_module, decl_storage,
+    traits::{Currency, EnsureOrigin, ExistenceRequirement::KeepAlive, Get},
     weights::Weight,
 };
-use sp_runtime::{DispatchError, DispatchResult};
+use sp_runtime::{traits::AccountIdConversion, DispatchResult, ModuleId};
 use sp_std::prelude::*;
 
 mod default_weights;
@@ -33,7 +33,6 @@ mod tests;
 
 type BalanceOf<T> =
     <<T as Trait>::Currency as Currency<<T as frame_system::Trait>::AccountId>>::Balance;
-//type NegativeImbalanceOf<T> = <<T as Trait>::Currency as Currency<<T as frame_system::Trait>::AccountId>>::NegativeImbalance;
 
 pub trait WeightInfo {
     fn mint() -> Weight;
@@ -42,6 +41,9 @@ pub trait WeightInfo {
 pub trait Trait: frame_system::Trait {
     /// The overarching event type.
     type Event: From<Event<Self>> + Into<<Self as frame_system::Trait>::Event>;
+
+    /// The bridge's module id, used for deriving its sovereign account ID.
+    type ModuleId: Get<ModuleId>;
 
     /// The currency trait.
     type Currency: Currency<Self::AccountId>;
@@ -55,8 +57,18 @@ pub trait Trait: frame_system::Trait {
 
 decl_storage! {
     trait Store for Module<T: Trait> as Dummy {
-        /// The amount of token available for minting via a bridge.
-        pub ToMint get(fn to_mint) config(): BalanceOf<T>;
+
+    }
+    add_extra_genesis {
+        config(balance): BalanceOf<T>;
+        build(|config| {
+            // Create Bridge pot
+            assert!(
+                config.balance >= T::Currency::minimum_balance(),
+                "the balance of any account should always be more than existential deposit.",
+            );
+            T::Currency::deposit_creating(&<Module<T>>::account_id(), config.balance);
+        });
     }
 }
 
@@ -74,7 +86,7 @@ decl_event!(
 decl_error! {
     /// Error for the identity module.
     pub enum Error for Module<T: Trait> {
-        TooMuch
+
     }
 }
 
@@ -82,6 +94,8 @@ decl_module! {
     /// Identity module declaration.
     pub struct Module<T: Trait> for enum Call where origin: T::Origin {
         type Error = Error<T>;
+        /// The bridge's module id, used for deriving its sovereign account ID.
+        const ModuleId: ModuleId = T::ModuleId::get();
 
         fn deposit_event() = default;
 
@@ -90,24 +104,21 @@ decl_module! {
         fn mint(origin, account: T::AccountId, #[compact] amount: BalanceOf<T>) -> DispatchResult {
             T::MintOrigin::ensure_origin(origin)?;
 
-            let endowed = <ToMint<T>>::try_mutate(
-                | minted_amount | -> Result< BalanceOf<T>, DispatchError> {
-                    ensure!( *minted_amount>=amount , Error::<T>::TooMuch);
+            let bridge = Self::account_id();
+            let _ = T::Currency::transfer(&bridge, &account, amount, KeepAlive)?;
 
-                    *minted_amount -= amount;
-                    let _ = T::Currency::deposit_creating(
-                        &account,
-                        amount,
-                    );
-                    Ok( amount )
-                }
-            )?;
-
-            Self::deposit_event(RawEvent::Minted(account, endowed));
-
+            Self::deposit_event(RawEvent::Minted(account, amount));
             Ok(())
         }
     }
 }
 
-impl<T: Trait> Module<T> {}
+impl<T: Trait> Module<T> {
+    /// The account ID of the external chain.
+    ///
+    /// This actually does computation. If you need to keep using it, then make sure you cache the
+    /// value and only call this once.
+    pub fn account_id() -> T::AccountId {
+        T::ModuleId::get().into_account()
+    }
+}

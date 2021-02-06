@@ -109,11 +109,15 @@ impl balances::Trait for Test {
     type WeightInfo = ();
 }
 
+parameter_types! {
+    pub const BridgeModuleId: ModuleId = ModuleId(*b"test/001");
+}
 impl Trait for Test {
     type Event = TestEvent;
     type Currency = pallet_balances::Module<Test>;
     type WeightInfo = ();
     type MintOrigin = EnsureRoot<Self::AccountId>;
+    type ModuleId = BridgeModuleId;
 }
 
 // Assign back to type variables in order to make dispatched calls of these modules later.
@@ -130,7 +134,7 @@ pub fn new_test_ext(_root_key: u64) -> sp_io::TestExternalities {
     let mut t = frame_system::GenesisConfig::default()
         .build_storage::<Test>()
         .unwrap();
-    super::GenesisConfig::<Test> { to_mint: 1_000_000 }
+    super::GenesisConfig::<Test> { balance: 1_000_000 }
         .assimilate_storage(&mut t)
         .unwrap();
     t.into()

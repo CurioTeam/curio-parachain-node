@@ -25,14 +25,16 @@ use mock::{new_test_ext, Balances, Dummy, Test};
 fn test_setup_works() {
     use frame_system::RawOrigin;
     new_test_ext(1).execute_with(|| {
-        assert_eq!(Balances::total_issuance(), 0);
+        assert_eq!(Balances::total_issuance(), 1_000_000);
         assert_ok!(Dummy::mint(RawOrigin::Root.into(), 2, 400));
         assert_eq!(Balances::free_balance(2), 400);
-        assert_eq!(Balances::total_issuance(), 400);
+        assert_eq!(Balances::total_issuance(), 1_000_000);
 
         assert_noop!(
             Dummy::mint(RawOrigin::Root.into(), 2, 1_000_000),
-            Error::<Test>::TooMuch
+            pallet_balances::Error::<Test, _>::InsufficientBalance
         );
+
+        assert_eq!(Balances::free_balance(Dummy::account_id()), 1_000_000 - 400);
     });
 }

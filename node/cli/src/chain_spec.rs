@@ -347,7 +347,7 @@ pub fn testnet_genesis(
             max_members: 999,
         }),
         pallet_vesting: Some(Default::default()),
-        pallet_dummy: Some(DummyConfig { to_mint: MINT }),
+        pallet_dummy: Some(DummyConfig { balance: MINT }),
     }
 }
 
