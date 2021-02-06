@@ -263,7 +263,7 @@ pub fn testnet_genesis(
 
     const ENDOWMENT: Balance = 8_000_000 * DOLLARS;
     const STASH: Balance = 500_000 * DOLLARS;
-    const MINT: Balance = 10_000_000 * DOLLARS;
+    const MINT: Balance = 2_000_000 * DOLLARS;
 
     GenesisConfig {
         frame_system: Some(SystemConfig {
