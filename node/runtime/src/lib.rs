@@ -114,7 +114,7 @@ pub const VERSION: RuntimeVersion = RuntimeVersion {
     // and set impl_version to 0. If only runtime
     // implementation changes and behavior does not, then leave spec_version as
     // is and increment impl_version.
-    spec_version: 259,
+    spec_version: 1,
     impl_version: 1,
     apis: RUNTIME_API_VERSIONS,
     transaction_version: 1,
@@ -433,10 +433,10 @@ impl pallet_session::historical::Trait for Runtime {
 
 pallet_staking_reward_curve::build! {
     const REWARD_CURVE: PiecewiseLinear<'static> = curve!(
-        min_inflation: 0_050_000,
+        min_inflation: 0_020_000,
         // APY = (e^Inf  - 1) / ideal_stake
-        max_inflation: 0_120_000,
-        ideal_stake: 0_700_000,
+        max_inflation: 0_100_000,
+        ideal_stake: 0_600_000,
         falloff: 0_050_000,
         max_piece_count: 40,
         test_precision: 0_005_000,
@@ -1280,5 +1280,24 @@ mod tests {
         }
 
         is_submit_signed_transaction::<Runtime>();
+    }
+
+    #[test]
+    fn reward_curve() {
+        let curve: &'static PiecewiseLinear<'static> = &REWARD_CURVE;
+
+        // ideal stake
+        let payout: u64 = curve.calculate_for_fraction_times_denominator(8_400_000, 14_000_000);
+        assert_eq!(payout, 1_400_000); // 10.0%
+        assert_eq!(payout, curve.maximum * 14_000_000);
+        // 50% stake
+        let payout: u64 = curve.calculate_for_fraction_times_denominator(7_000_000, 14_000_000);
+        assert_eq!(payout, 1_213_333); // 8.6%
+                                       // initial (16.7%) stake
+        let payout: u64 = curve.calculate_for_fraction_times_denominator(2_000_000, 14_000_000);
+        assert_eq!(payout, 546_666); // 3.9%
+                                     // almost all
+        let payout: u64 = curve.calculate_for_fraction_times_denominator(12_000_000, 14_000_000);
+        assert_eq!(payout, 311_735); // 2.2%
     }
 }

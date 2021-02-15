@@ -30,7 +30,7 @@ use node_runtime::{
 };
 use pallet_im_online::sr25519::AuthorityId as ImOnlineId;
 use sc_chain_spec::ChainSpecExtension;
-use sc_service::ChainType;
+use sc_service::{ChainType, Properties};
 use sc_telemetry::TelemetryEndpoints;
 use serde::{Deserialize, Serialize};
 use sp_authority_discovery::AuthorityId as AuthorityDiscoveryId;
@@ -76,6 +76,17 @@ fn session_keys(
         im_online,
         authority_discovery,
     }
+}
+
+/// declare Token symbol and decimals
+pub fn properties() -> Properties {
+    let mut properties = Properties::new();
+
+    //properties.insert("ss58Format".into(), 18.into());
+    properties.insert("tokenDecimals".into(), 18.into());
+    properties.insert("tokenSymbol".into(), "CGT".into());
+
+    properties
 }
 
 fn staging_testnet_config_genesis() -> GenesisConfig {
@@ -188,7 +199,7 @@ pub fn staging_testnet_config() -> ChainSpec {
                 .expect("Staging telemetry url is valid; qed"),
         ),
         None,
-        None,
+        Some(properties()),
         Default::default(),
     )
 }
@@ -261,7 +272,7 @@ pub fn testnet_genesis(
     });
     let num_endowed_accounts = endowed_accounts.len();
 
-    const ENDOWMENT: Balance = 8_000_000 * DOLLARS;
+    const ENDOWMENT: Balance = 10_000_000 * DOLLARS;
     const STASH: Balance = 500_000 * DOLLARS;
     const MINT: Balance = 2_000_000 * DOLLARS;
 

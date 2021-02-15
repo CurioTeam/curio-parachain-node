@@ -1,6 +1,6 @@
 [package]
 name = "node-cli"
-version = "2.0.1"
+version = "2.1.0"
 authors = ["Dmitry Dulesov <dmitry.dulesov@gmail.com>", "Parity Technologies <admin@parity.io>"]
 description = "Curio node implementation in Rust."
 build = "build.rs"
@@ -8,7 +8,7 @@ edition = "2018"
 license = "Apache-2.0"
 default-run = "curio"
 homepage = "https://substrate.dev"
-repository = "https://github.com/paritytech/substrate/"
+repository = "https://github.com/CurioTeam/curio-parachain-node"
 
 [package.metadata.wasm-pack.profile.release]
 # `wasm-opt` has some problems on linux, see
