@@ -1,0 +1,13 @@
+version: "3.8"
+services:
+  validator:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    volumes:
+    - ./storage/chains:/var/curio/chains
+  rpc_client:
+    image: curlimages/curl:7.77.0
+    command: ["/bin/sh", "-c", "echo \"Waiting for 30 seconds...\" && \ sleep 30 && curl -H \"Content-Type: application/json\" -d '{\"id\":1, \"jsonrpc\":\"2.0\", \"method\": \"author_rotateKeys\", \"params\":[]}' http://validator:9933"]
+    depends_on:
+      - validator
